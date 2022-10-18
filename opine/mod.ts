@@ -1,3 +1,5 @@
+/// <reference types="./opine-types.d.ts" />
+
 import {
   NextFunction,
   OpineRequest,
