@@ -15,7 +15,7 @@ import {
   MultipartReader,
 } from "https://deno.land/x/denjucks@1.1.1/src/deps/path/std/mime/mod.ts";
 
-export async function multipartParser(
+async function multipartParser(
   req: OpineRequest,
   _res: OpineResponse,
   next: NextFunction,
