@@ -1,4 +1,5 @@
 /// <reference types="./opine-types.d.ts" />
+import { MultipartFormData } from "https://deno.land/x/denjucks@1.1.1/src/deps/path/std/mime/multipart.ts";
 
 import {
   NextFunction,
@@ -41,3 +42,5 @@ export async function multipartParser(
   req.multipartData = form_data;
   return next();
 }
+
+export type MultipartData = MultipartFormData;
