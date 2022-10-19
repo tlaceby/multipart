@@ -78,7 +78,22 @@ export default function multipartFormParser(options?: MultipartOptions) {
 		const boundary = get_boundary(req);
 		if (!boundary) return next();
 
-		const form_data = await new MultipartReader(req.body, boundary).readForm();
+		// use maxMemory to specify the maximum allocated memory for parsing.
+		const form_data = await new MultipartReader(req.body, boundary).readForm(
+			options?.maxMemory
+		);
+
+		// produce the files[] list of the config specifies
+		if (options?.files) {
+			const files = getFormFiles(form_data);
+			req.files = files;
+
+			// If the files only option is set then go next
+			if (options?.filesOnly) {
+				return next();
+			}
+		}
+
 		req.multipartData = form_data;
 		return next();
 	};
@@ -100,4 +115,17 @@ function get_boundary(req: OpineRequest): null | string {
 	}
 
 	return null;
+}
+
+export function getFormFiles(form_data: MultipartFormData) {
+	const files = new Array<FormFile>();
+
+	for (const form_object of form_data) {
+		// Select only the fields which contain FormFile objects.
+		if (typeof form_object[1] == "object") {
+			files.push(form_object[1]);
+		}
+	}
+
+	return files;
 }
