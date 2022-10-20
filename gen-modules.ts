@@ -1,31 +1,24 @@
-const SEPERATOR = `// ------ AUTO GENERATED MODULE DECLARATIONS ---------- //\n// -------------------------------------------------------`;
-const SUPPORTED_MINIMUM = 0.1;
+const SUPPORTED_MINIMUM = 2.0;
 const SUPPORTED_MAXIMUM = 2.4;
-const encoder = new TextEncoder();
-const GENERATED_TEMPLATE = (version: string) => {
-	return `
-	declare module "https://deno.land/x/opine@${version}.0/mod.ts" {
-		interface OpineRequest {
-			multipartData?: MultipartFormData;
-			multipartFiles?: FormFile[];
-		}
-	}`;
-};
 
-const FILE_BEFORE_SEPERATOR = (await Deno.readTextFile("./opine/mod.ts")).split(
-	SEPERATOR
-)[0];
-
-const file = await Deno.open("./test.ts", { write: true });
-await file.write(encoder.encode(FILE_BEFORE_SEPERATOR));
-
-await file.write(encoder.encode(SEPERATOR));
+// Erases file and begin by appending the Library Guts
+const template_file_contents = Deno.readTextFileSync("./opine/template.ts");
+const search_pattern = "opine@2.2.0";
 
 for (
-	let version = SUPPORTED_MINIMUM;
-	version < SUPPORTED_MAXIMUM;
-	version += 0.1
+  let version = SUPPORTED_MINIMUM;
+  version < SUPPORTED_MAXIMUM;
+  version += 0.1
 ) {
-	const v = version.toFixed(1);
-	file.writeSync(encoder.encode(GENERATED_TEMPLATE(v)));
+  const v = version.toFixed(1) + ".0";
+  const filename = `multipart_opine${v}.ts`;
+  try {
+    Deno.removeSync(`./opine/${filename}`);
+  } catch (_) {
+    //
+  }
+  await Deno.writeTextFile(
+    `./opine/${filename}`,
+    template_file_contents.replaceAll(search_pattern, `opine@${v}`),
+  );
 }
