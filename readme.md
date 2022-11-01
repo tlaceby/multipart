@@ -35,3 +35,45 @@ app.use('/upload',  multipartFormParser({files: true}),  (req, res) => {
 // Start server
 app.listen(8000);
 ```
+
+
+**Parsing File and Form Fields**
+```ts
+// Import Opine
+import { opine } from 'https://deno.land/x/opine@2.3.3/mod.ts';
+
+// Import Middleware
+import multipartFormParser from 'https://github.com/tylerlaceby/multipart/raw/main/opine/mod.ts';
+
+// Define Opine App
+const app = opine();
+
+// Define main route with a simple form containg upload input and submit button with action that submit to '/upload' route
+app.get('/', (req, res) => {
+  res.send(`
+      <form action="/upload" method="post" enctype="multipart/form-data">
+        <label for="fname">File name</label>
+        <input type="text" name="fname" placeholder="File name" /><br><br>
+        <input type="file" name="file" />
+        <input type="submit" value="Upload" /> 
+      </form>`);
+});
+
+// Define upload route to handle upload submit.
+app.post('/upload',  multipartFormParser({files: true}),  (req, res) => {
+  const formData = req.parsedBody?.formData;
+  res.json({
+      fields: {
+        // Read form values using .value('value-field-name')
+        // in this example it 'fname' as defined in the form above.
+        fileName: formData.value('fname'), 
+      }, 
+      // Read form file using .file('value-field-name')
+      // in this example it 'file' as defined in the form above.
+      file: formData.file('file')  
+  });
+});
+
+// Start server
+app.listen(8000);
+```
