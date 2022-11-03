@@ -57,13 +57,15 @@ export default function multipartFormParser(options?: MultipartOptions) {
     );
 
     const form: FormData = {
+      fields: {},
       files: [],
       formData: form_data,
     };
 
-    // Only if the files field is set true.
-    if (options?.files) {
-      form.files = getFormFiles(form_data);
+    if(options?.files || options?.fields){
+      const data = getFormData(form_data, { files: options?.files, fields: options?.fields });
+      form.files = data[0] as FormFile[];
+      form.fields = data[1] as Record<string, string>;
 
       // Log count of files added to req.body.files
       if (options.debug) {
