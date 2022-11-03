@@ -34,6 +34,7 @@ export interface FormFile {
 export interface FormData {
   formData: MultipartFormData; // Contains all parsed MultipartFormData from request.
   files: FormFile[]; // Contains array of parsed files if the files: true option is selected.
+  fields: Record<string, string>; // Contains object of parsed form fields if the fields: true option is selected.
 }
 
 // ---------------------------------------------------
@@ -75,4 +76,29 @@ export function getFormFiles(form_data: MultipartFormData) {
   }
 
   return files;
+}
+
+/**
+ * Given a parsed MultipartFormData object will return an object of files and/or fields based on if 'files' and 'fields' are true or false.
+ */
+ export function getFormData(form_data: MultipartFormData, {files = false, fields = false}) {
+  const resFields = new Map<string, string>();
+  const resFiles = new Array<FormFile>();
+
+  for (const form_object of form_data) {
+    // Select only the fields which contain FormFile objects.
+    if (files && typeof form_object[1] == "object") {
+      resFiles.push(form_object[1]);
+    }
+
+    // Select only the fields which contain strings.
+    if (fields && typeof form_object[1] == "string") {
+      resFields.set(form_object[0], form_object[1]);
+    }
+  }
+  
+  return [
+    resFiles,
+    Object.fromEntries(resFields)
+  ];
 }
